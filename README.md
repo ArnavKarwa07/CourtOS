@@ -1,91 +1,74 @@
 # CourtOS
 
-CourtOS is an arena operations dashboard for telemetry, incidents, court overlays, and network policy review. The current implementation target is a usable, accessible, production-deployable web application with a real data flow and a clear simulation path for any integrations that do not exist yet.
+CourtOS is an arena operations dashboard for telemetry ingest, incident detection, court-overlay gating, and network-policy display. It runs in simulation mode by default and is designed for a single operator with no authentication in the MVP.
+
+## Inspiration & NBA Technology Context
+
+CourtOS is inspired by the next-generation technologies currently transforming the **NBA** and modern sports arenas (such as optical tracking cameras like Second Spectrum, real-time LED court projections, dynamic player biometrics, and software-defined venue networks). 
+
+The platform acts as an operational extension designed to sit between the high-frequency tracking cameras and the physical court infrastructure. It ensures that as high-tech LED overlays (like visual lines, player stats, or advertisements) are projected onto the court, they are strictly gated by the game state (e.g. suppressed during live play to avoid distracting players, per NBA guidelines) and backed by intelligent safety limits.
 
 ## What CourtOS Does
 
-- Accepts structured telemetry events
-- Updates a canonical arena state
-- Detects and displays incidents
-- Enforces court overlay rules based on play state
-- Shows network policy recommendations for normal and emergency conditions
+- Accepts structured telemetry events via REST API
+- Maintains a canonical arena state (game clock, play state, incidents, overlays, network allocation)
+- Detects incidents when kinematic thresholds are breached
+- Gates court overlays by play state (suppressed during live play)
+- Displays simulated network-policy recommendations
+- Pushes real-time state updates to the dashboard via SSE
 
 ## What CourtOS Is Not
 
-- It is not a promise of direct control over physical arena hardware
-- It is not a speculative showcase with fake buttons
-- It is not a demo-only app with no deployment path
+- Not a hardware controller (all arena hardware interaction is simulated and labeled)
+- Not a multi-user platform (single operator, no auth in MVP)
+- Not a mobile app (minimum viewport: 1024 × 768)
 
-## Product Rules
+## MVP Boundaries
 
-1. The UI must be accessible, keyboard navigable, and mobile friendly.
-2. All important states must be understandable without color alone.
-3. Validation must happen on the backend, not only in the browser.
-4. Errors must be clear, actionable, and non-technical.
-5. Simulation mode must work end to end without missing services.
+| Feature | Simulation | Real Integration |
+|---------|-----------|-----------------|
+| Telemetry source | Built-in generator (1 event/sec) | External API callers |
+| Network policy | `[SIMULATED]` label, recommendations only | SDN integration (future) |
+| Court overlay | State-gated rendering, no projection | Projection adapter (future) |
+| Storage | SQLite | PostgreSQL |
+| Auth | None | RBAC (future) |
 
-## Core Workflow
+## Quick Start
 
-1. Receive telemetry.
-2. Validate and store the event.
-3. Update state and derive incidents or overlay changes.
-4. Surface the result in the dashboard and audit log.
-5. Let the operator resolve or review the outcome.
+```bash
+docker compose up
+# Dashboard: http://localhost:8000
+# API docs: http://localhost:8000/docs
+# Health: http://localhost:8000/api/v1/health
+```
 
-## Documentation Map
+## Documentation
 
-- [PRD.md](./PRD.md): product goals, users, workflows, acceptance criteria
-- [TRD.md](./TRD.md): architecture, data model, API surface, validation, tests
-- [PROMPTS.md](./PROMPTS.md): project-specific prompt order for AI-assisted work
+- [PRD.md](./PRD.md) — product requirements, MVP scope, acceptance criteria, risks, open questions
+- [TRD.md](./TRD.md) — architecture, data models, API contracts, testing matrix, deployment config
 
-## Project-Specific Prompt Order
+## Tech Stack
 
-Use this order for CourtOS work. It is different from the generic prompt library order because CourtOS needs implementation clarity, accessibility, and deployment readiness early.
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python 3.11+, FastAPI, Pydantic v2 |
+| Frontend | React 18+ (Vite) |
+| Database | SQLite (dev) / PostgreSQL (prod) |
+| Real-time | Server-Sent Events |
+| Testing | pytest, Playwright, axe-core |
 
-1. `00-format-rules.md` - establish output conventions and placeholder discipline
-2. `10-documentation-standards.md` - rewrite/maintain the docs before coding
-3. `09-api-design.md` - lock down the telemetry and operations API surface
-4. `08-database-design.md` - define the canonical state, events, and audit history
-5. `02-uiux-research-design.md` - design the operator flows and accessibility requirements
-6. `11-frontend-quality-system.md` - standardize feedback copy, typography, and titles
-7. `01-security-comprehensive.md` - review auth, validation, secrets, and exposure risks
-8. `07-testing-qa.md` - define unit, integration, E2E, and accessibility tests
-9. `06-performance-optimization.md` - check render speed, API latency, and dependency resilience
-10. `04-pre-deployment-checklists.md` - verify release readiness before shipping
-11. `05-saas-launch-checklist.md` - only if CourtOS ships as a SaaS product with billing or public launch requirements
-12. `03-3d-web-building.md` - only if a marketing site or hero visualization needs cinematic assets
+## Project Structure
 
-## CourtOS Prompt Packs
-
-### Phase 1: Spec and Structure
-
-- docs rewrite
-- API design
-- database design
-
-### Phase 2: Experience and Accessibility
-
-- UX review
-- frontend quality system
-- documentation standards
-
-### Phase 3: Hardening
-
-- security review
-- testing and QA
-- performance optimization
-
-### Phase 4: Release
-
-- pre-deployment checklist
-- launch checklist if applicable
-
-## Prompt Order Notes
-
-- Run security and testing prompts again after major code changes.
-- Keep simulation and real integration prompts separate.
-- Do not treat visual polish as complete until accessibility is verified.
-
-## Next Build Decision
-
-If the next step is implementation, start with the telemetry API and the dashboard state model. If the next step is product review, use the docs above as the source of truth.
+```
+courtos/               # Backend Python package
+├── core/              # StateManager, SSE, logging, middlewares
+├── db/                # Database adapters & migrations
+├── models/            # Pydantic schemas and enums
+├── services/          # Kinematic, game state, overlay, network, router
+├── simulation/        # Scripted event generator loop
+├── app.py             # FastAPI application and routes
+├── config.py          # Settings config loader
+└── seed.py            # Database seeding script
+frontend/              # React TypeScript Vite client SPA
+tests/                 # pytest suites (domain, integration, API validation)
+```
