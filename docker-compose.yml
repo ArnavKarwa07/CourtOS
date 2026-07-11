@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    environment:
+      - COURTOS_MODE=simulation
+      - COURTOS_DB_BACKEND=sqlite
+      - COURTOS_DB_URL=./data/courtos.db
+      - COURTOS_LOG_LEVEL=info
+      - COURTOS_HOST=0.0.0.0
+      - COURTOS_PORT=8080
+    volumes:
+      - ./data:/app/data
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=courtos_user
+      - POSTGRES_PASSWORD=courtos_secure_password
+      - POSTGRES_DB=courtos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
