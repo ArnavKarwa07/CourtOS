@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { OverlayState } from '../types';
 
 interface CourtOverlayViewProps {
@@ -63,14 +63,14 @@ export const CourtOverlayView = React.memo(({ overlay, playState, addOverlay, re
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
           {overlay.active_overlays.length === 0 ? (
             <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-secondary)", textAlign: "center", padding: "var(--space-4) 0" }}>
-              {overlay.mode === "static" ? "ðŸ”’ Overlays suppressed during live play." : "No active overlays."}
+              {overlay.mode === "static" ? "🔒 Overlays suppressed during live play." : "No active overlays."}
             </p>
           ) : (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
               {overlay.active_overlays.map((overlayId) => (
                 <span key={overlayId} className="badge badge-info" style={{ paddingRight: "var(--space-1)", textTransform: "none", display: "inline-flex", alignItems: "center" }}>
                   {overlayId}
-                  <button style={{ border: "none", background: "transparent", cursor: "pointer", color: "inherit", marginLeft: "var(--space-1)", padding: "var(--space-1)" }} onClick={() => removeOverlay(overlayId)} aria-label={`Remove overlay ${overlayId}`}>âœ•</button>
+                  <button style={{ border: "none", background: "transparent", cursor: "pointer", color: "inherit", marginLeft: "var(--space-1)", padding: "var(--space-1)" }} onClick={() => removeOverlay(overlayId)} aria-label={`Remove overlay ${overlayId}`}>✕</button>
                 </span>
               ))}
             </div>

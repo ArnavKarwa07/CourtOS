@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCourtOS } from "./hooks/useCourtOS";
 import { Header } from "./components/Header";
 import { TelemetryChart } from "./components/TelemetryChart";
@@ -53,9 +53,9 @@ export default function App() {
       {showRealtimeModal && (
         <div className="modal-overlay" onClick={() => setShowRealtimeModal(false)} role="dialog" aria-modal="true" aria-labelledby="realtime-modal-title">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">ðŸ”’</div><h3 id="realtime-modal-title" className="modal-title">Real-Time Mode Unavailable</h3>
+            <div className="modal-icon">🔒</div><h3 id="realtime-modal-title" className="modal-title">Real-Time Mode Unavailable</h3>
             <div className="modal-body"><p>Real-time mode is currently not available for the following reasons:</p><ul className="modal-reasons"><li><strong>No live hardware connected</strong></li><li><strong>No active game session</strong></li><li><strong>Network policy not configured</strong></li></ul></div>
-            <button className="btn modal-close-btn" onClick={() => setShowRealtimeModal(false)} autoFocus>Got it â€” Stay in Simulation</button>
+            <button className="btn modal-close-btn" onClick={() => setShowRealtimeModal(false)} autoFocus>Got it — Stay in Simulation</button>
           </div>
         </div>
       )}
@@ -63,7 +63,7 @@ export default function App() {
         {toasts.map((toast) => (
           <div key={toast.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "15px", padding: "12px 20px", borderRadius: "var(--radius-md)", color: "#FFFFFF", boxShadow: "0 4px 12px rgba(0,0,0,0.5)", fontSize: "var(--text-sm)", fontWeight: "500", backgroundColor: toast.type === "success" ? "#10B981" : toast.type === "error" ? "#EF4444" : "#3B82F6" }}>
             <span>{toast.message}</span>
-            <button style={{ border: "none", background: "transparent", color: "#FFFFFF", cursor: "pointer", fontWeight: "bold" }} onClick={() => dismissToast(toast.id)} aria-label="Dismiss notification">âœ•</button>
+            <button style={{ border: "none", background: "transparent", color: "#FFFFFF", cursor: "pointer", fontWeight: "bold" }} onClick={() => dismissToast(toast.id)} aria-label="Dismiss notification">✕</button>
           </div>
         ))}
       </div>
