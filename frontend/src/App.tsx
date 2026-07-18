@@ -1,3 +1,5 @@
+import VideoUploadPanel from './components/VideoUploadPanel';
+import VideoTracker from './components/VideoTracker';
 import React, { useState, useEffect, useRef, useReducer } from "react";
 
 // Design Enums matching backend
@@ -1377,72 +1379,10 @@ export default function App() {
             )}
           </ul>
         </section>
-        {/* Venue Video Placeholder */}
-        <section
-          className="panel"
-          style={{ gridArea: "video", maxHeight: "360px", overflow: "hidden" }}
-          aria-labelledby="video-heading"
-        >
-          <div className="panel-header">
-            <h2 id="video-heading" className="panel-title">
-              Venue Video
-            </h2>
-            <span className="badge badge-live">Placeholder</span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-2)",
-              marginBottom: "var(--space-3)",
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              className="btn"
-              style={{ backgroundColor: "var(--color-focus)" }}
-              onClick={() =>
-                addToast("info", "LIVE video placeholder (no playback yet)")
-              }
-              aria-label="Switch to live footage placeholder"
-            >
-              LIVE
-            </button>
-            <button
-              className="btn"
-              style={{ backgroundColor: "var(--color-surface-elevated)" }}
-              onClick={() =>
-                addToast(
-                  "info",
-                  "SIMULATED video placeholder (no playback yet)",
-                )
-              }
-              aria-label="Switch to simulated footage placeholder"
-            >
-              SIMULATED
-            </button>
-          </div>
-
-          <div
-            style={{
-              borderRadius: "var(--radius-md)",
-              backgroundColor: "#000",
-              border: "1px solid var(--color-border)",
-              height: "210px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "rgba(255,255,255,0.85)",
-              fontFamily: "var(--font-mono)",
-              textAlign: "center",
-              padding: "var(--space-4)",
-            }}
-          >
-            No video playback yet. Add your NBA game footage source later.
-          </div>
-        </section>
-
-        {/* end grid container */}
+                {/* Mock Video Feature */}
+        <VideoUploadPanel />
+        <VideoTracker />
+{/* end grid container */}
       </div>
 
       {/* Floating Toast Notification Stack */}
