@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -10,7 +10,22 @@ from courtos.ai.state import AgentState
 settings = Settings()
 
 class SportsCommentator:
+    """Class description.\n"""
+
     def __init__(self):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         self.api_key = settings.gemini_api_key or "MOCK_KEY"
         self.model = ChatGoogleGenerativeAI(
             model=GEMINI_MODEL_NAME,
@@ -20,6 +35,19 @@ class SportsCommentator:
         self.workflow = self._build_graph()
 
     def _build_graph(self) -> StateGraph:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         builder = StateGraph(AgentState)
 
         # Add Nodes
@@ -34,10 +62,36 @@ class SportsCommentator:
         return builder.compile()
 
     async def analyze_event(self, state: AgentState) -> Dict[str, Any]:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         # Context already contains event details
         return {"context": state.get("context", {})}
 
     async def generate_commentary(self, state: AgentState) -> Dict[str, Any]:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         event_data = state["context"].get("event", {})
 
         payload = event_data.get("payload", {}) or {}
@@ -111,6 +165,19 @@ class SportsCommentator:
         return {"commentary": reply}
 
     async def commentate(self, event: Dict[str, Any]) -> str:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         initial_state = {
             "messages": [],
             "queries": [],

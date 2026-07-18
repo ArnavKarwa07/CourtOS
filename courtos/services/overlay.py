@@ -3,7 +3,23 @@ from courtos.models import OverlayState
 from courtos.models.enums import PlayState
 
 class OverlayService:
+    """Service class.
+    """
+
     def evaluate_gating(self, play_state: PlayState, current_overlay: OverlayState) -> OverlayState:
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         if play_state == PlayState.LIVE:
             return OverlayState(
                 mode="static",
@@ -16,8 +32,7 @@ class OverlayService:
             )
 
     def add_overlay(self, current_overlay: OverlayState, overlay_id: str, play_state: PlayState) -> tuple[OverlayState, Optional[str]]:
-        """
-        Add an overlay. Return updated OverlayState and error string if any.
+        """Add an overlay. Return updated OverlayState and error string if any.
         """
         if play_state == PlayState.LIVE:
             return current_overlay, "Cannot add overlays during live play"
@@ -29,8 +44,7 @@ class OverlayService:
         return OverlayState(mode="dynamic", active_overlays=new_active), None
 
     def remove_overlay(self, current_overlay: OverlayState, overlay_id: str) -> tuple[OverlayState, Optional[str]]:
-        """
-        Remove an overlay. Return updated OverlayState and error string if any.
+        """Remove an overlay. Return updated OverlayState and error string if any.
         """
         if overlay_id not in current_overlay.active_overlays:
             return current_overlay, f"Overlay {overlay_id} is not active"

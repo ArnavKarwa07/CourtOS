@@ -4,14 +4,29 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Tuple
 from courtos.models import CourtOSState, TelemetryEvent, Incident, NetworkAllocation, OverlayState
-from courtos.models.enums import IncidentStatus
 from courtos.db.adapter import DatabaseAdapter
 from courtos.core.sse import SSEPublisher
 from courtos.services.router import EventRouter
 from courtos.services.network import NetworkPolicyService
 
 class StateManager:
+    """Service class.
+    """
+
     def __init__(self, db: DatabaseAdapter, sse: SSEPublisher, router: EventRouter, network_service: NetworkPolicyService):
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         self.db = db
         self.sse = sse
         self.router = router
@@ -55,8 +70,7 @@ class StateManager:
         return self._state
 
     async def process_event(self, event: TelemetryEvent) -> Tuple[int, List[Incident]]:
-        """
-        Ingest event, run rules, save state transactionally, and broadcast SSE.
+        """Ingest event, run rules, save state transactionally, and broadcast SSE.
         Returns: Tuple[incidents_created_count, list_of_new_incidents]
         """
         async with self._lock:
@@ -240,6 +254,19 @@ class StateManager:
             return self._state.overlay
 
     def _default_state(self) -> CourtOSState:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         return CourtOSState(
             game_clock="00:00",
             period=1,

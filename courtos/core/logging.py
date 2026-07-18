@@ -3,7 +3,23 @@ import json
 from datetime import datetime, timezone
 
 class JSONFormatter(logging.Formatter):
+    """Service class.
+    """
+
     def format(self, record: logging.LogRecord) -> str:
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         log_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
@@ -29,6 +45,19 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(log_entry)
 
 def configure_logging(log_level: str = "info") -> None:
+    """Method description.
+
+    Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+    Returns:
+        Any: Return value.
+
+    Raises:
+        Exception: If an error occurs.
+
+    """
     logger = logging.getLogger("courtos")
     logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
     

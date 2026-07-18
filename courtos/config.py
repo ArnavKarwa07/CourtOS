@@ -2,6 +2,8 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    """Class description.\n"""
+
     model_config = SettingsConfigDict(env_prefix="COURTOS_")
 
     mode: str = "simulation"
@@ -19,4 +21,8 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.1-flash-lite"
     gemini_requests_per_minute: int = 15
+
+    auth_required: bool = False
+    api_key: str = "courtos-secret-api-key"
+
 

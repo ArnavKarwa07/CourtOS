@@ -1,7 +1,7 @@
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any
 from langgraph.graph import StateGraph, END
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from courtos.config import Settings
 from courtos.ai.gemini import GEMINI_MODEL_NAME, wait_for_gemini_slot
@@ -11,7 +11,22 @@ from courtos.ai.state import AgentState
 settings = Settings()
 
 class OperatorAssistant:
+    """Class description.\n"""
+
     def __init__(self, db_adapter: DatabaseAdapter):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         self.db = db_adapter
         # Configure model (fallback to mock if key is missing for tests/simulation robustness)
         self.api_key = settings.gemini_api_key or "MOCK_KEY"
@@ -23,6 +38,19 @@ class OperatorAssistant:
         self.workflow = self._build_graph()
 
     def _build_graph(self) -> StateGraph:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         builder = StateGraph(AgentState)
         
         # Add Nodes
@@ -49,6 +77,19 @@ class OperatorAssistant:
         return builder.compile()
 
     async def route_query(self, state: AgentState) -> Dict[str, Any]:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         user_msg = state["messages"][-1].content
         
         # If API key is not configured, return immediately to direct reply
@@ -72,9 +113,35 @@ class OperatorAssistant:
         return {"context": {"route": route}}
 
     def decide_routing(self, state: AgentState) -> str:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         return state["context"].get("route", "direct_reply")
 
     async def query_db_secure(self, state: AgentState) -> Dict[str, Any]:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         user_msg = state["messages"][-1].content
         
         # Generate safe SQL select query based on db schema details
@@ -111,6 +178,19 @@ class OperatorAssistant:
             return {"queries": [], "context": {"db_error": f"Failed to execute query: {str(e)}"}}
 
     async def formulate_reply(self, state: AgentState) -> Dict[str, Any]:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         user_msg = state["messages"][-1].content
         db_results = state["context"].get("db_results", None)
         db_err = state["context"].get("db_error", None)
@@ -141,6 +221,19 @@ class OperatorAssistant:
         return {"reply": reply}
 
     async def ask(self, query: str) -> str:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         initial_state = {
             "messages": [HumanMessage(content=query)],
             "queries": [],

@@ -3,7 +3,23 @@ from courtos.models import NetworkAllocation, Incident
 from courtos.models.enums import Severity, IncidentStatus
 
 class NetworkPolicyService:
+    """Service class.
+    """
+
     def calculate_allocation(self, active_incidents: List[Incident]) -> NetworkAllocation:
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         has_critical = any(
             i.severity == Severity.CRITICAL and i.status == IncidentStatus.ACTIVE
             for i in active_incidents

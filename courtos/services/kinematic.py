@@ -6,13 +6,42 @@ from courtos.models.enums import Severity, IncidentStatus
 from courtos.models.telemetry import KinematicPayload
 
 class KinematicService:
+    """Service class.
+    """
+
     def __init__(self, decel_warn: float, decel_crit: float, velocity_warn: float, velocity_crit: float):
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         self.decel_warn = decel_warn
         self.decel_crit = decel_crit
         self.velocity_warn = velocity_warn
         self.velocity_crit = velocity_crit
 
     def evaluate(self, event: TelemetryEvent) -> List[Incident]:
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         payload: KinematicPayload = event.payload
         incidents = []
         now = datetime.now(timezone.utc)

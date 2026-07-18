@@ -3,6 +3,9 @@ from datetime import datetime
 from courtos.models import TelemetryEvent, Incident
 
 class DatabaseAdapter(Protocol):
+    """Service class.
+    """
+
     async def initialize(self) -> None:
         """Initialize connection and create tables if needed."""
         ...

@@ -3,7 +3,23 @@ import json
 from typing import List, AsyncGenerator, Optional
 
 class SSEPublisher:
+    """Service class.
+    """
+
     def __init__(self):
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         self._queues: List[asyncio.Queue] = []
         self._heartbeat_task: Optional[asyncio.Task] = None
 
@@ -44,18 +60,18 @@ class SSEPublisher:
 
     async def broadcast(self, event_type: str, data: dict) -> None:
         """Broadcast event to all listeners."""
+        json_data = data if isinstance(data, str) else json.dumps(data)
         event_payload = {
             "event": event_type,
-            "data": json.dumps(data)
+            "data": json_data
         }
         for queue in list(self._queues):
             try:
                 queue.put_nowait(event_payload)
-            except asyncio.QueueFull:
+            except (asyncio.QueueFull, Exception):
                 # Remove stale connection queue
-                self._queues.remove(queue)
-            except Exception:
-                pass
+                if queue in self._queues:
+                    self._queues.remove(queue)
 
     async def _ping_loop(self) -> None:
         """Heartbeat loop pushing keepalives every 15s to keep TCP alive."""

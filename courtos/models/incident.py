@@ -1,8 +1,11 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from courtos.models.enums import Severity, IncidentStatus
+from courtos.models.sanitizers import sanitize_text
 
 class Incident(BaseModel):
+    """Class description.\n"""
+
     incident_id: str = Field(min_length=1)
     severity: Severity
     category: str = Field(min_length=1)
@@ -11,3 +14,21 @@ class Incident(BaseModel):
     source_event_id: str = Field(min_length=1)
     status: IncidentStatus = IncidentStatus.ACTIVE
     resolved_at: datetime | None = None
+
+    @field_validator('category', 'message', mode='before')
+    @classmethod
+    def sanitize(cls, v: str) -> str:
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
+        return sanitize_text(v)

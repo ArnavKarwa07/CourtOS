@@ -1,13 +1,27 @@
 import time
 import uuid
-from typing import Dict, Tuple
+from typing import Dict
 from fastapi import Request, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
+    """Class description.\n"""
+
     async def dispatch(self, request: Request, call_next):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         # Inject correlation ID
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = request_id
@@ -17,15 +31,30 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         return response
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Class description.\n"""
+
     async def dispatch(self, request: Request, call_next):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         response = await call_next(request)
 
         # Apply secure response headers
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
         # CSP is strict by default.
         # Swagger UI (FastAPI /docs) uses assets from swagger-ui-dist CDN and inline scripts,
@@ -48,17 +77,43 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """
-    In-memory Sliding Window Rate Limiting middleware.
+    """In-memory Sliding Window Rate Limiting middleware.
     Limits high-frequency endpoints (e.g. /api/v1/telemetry) to prevent DoS.
     """
+
     def __init__(self, app, max_requests: int = 200, window_seconds: int = 60):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.client_records: Dict[str, list] = {}
 
     async def dispatch(self, request: Request, call_next):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         # Apply rate limiting specifically to POST telemetry endpoint
         if request.method == "POST" and request.url.path == "/api/v1/telemetry":
             client_ip = request.client.host if request.client else "unknown"
@@ -85,7 +140,22 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 class CSRFShieldMiddleware(BaseHTTPMiddleware):
+    """Class description.\n"""
+
     async def dispatch(self, request: Request, call_next):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
         # Enforce X-Requested-With header on all state-mutating requests (POST, PUT, DELETE, PATCH)
         # to defend against CSRF attacks in unauthenticated MVP dashboard
         if request.method in ("POST", "PUT", "DELETE", "PATCH"):
@@ -102,3 +172,83 @@ class CSRFShieldMiddleware(BaseHTTPMiddleware):
                     )
         return await call_next(request)
 
+class PayloadSizeLimitMiddleware:
+    """Class description.\n"""
+
+    def __init__(self, app, max_upload_size: int = 1_048_576):
+        """Method description.
+
+        Args:
+        *args: Arguments.
+        **kwargs: Keyword arguments.
+
+        Returns:
+        Any: Return value.
+
+        Raises:
+        Exception: If an error occurs.
+
+        """
+        self.app = app
+        self.max_upload_size = max_upload_size
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        if scope["method"] not in ("POST", "PUT", "PATCH"):
+            return await self.app(scope, receive, send)
+
+        # Check Content-Length header first
+        for name, value in scope.get("headers", []):
+            if name.lower() == b"content-length":
+                try:
+                    content_length = int(value)
+                    if content_length > self.max_upload_size:
+                        response = JSONResponse(
+                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                            content={"error": "payload_too_large", "message": "Request body exceeds maximum size limit"}
+                        )
+                        return await response(scope, receive, send)
+                except ValueError:
+                    pass
+
+        # Stream body and count
+        body_bytes = b""
+        more_body = True
+        messages = []
+
+        while more_body:
+            message = await receive()
+            messages.append(message)
+            body_bytes += message.get("body", b"")
+            
+            if len(body_bytes) > self.max_upload_size:
+                response = JSONResponse(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    content={"error": "payload_too_large", "message": "Request body exceeds maximum size limit"}
+                )
+                return await response(scope, receive, send)
+                
+            more_body = message.get("more_body", False)
+
+        # Re-inject consumed body
+        async def receive_wrapper():
+            """Method description.
+
+            Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+            Returns:
+            Any: Return value.
+
+            Raises:
+            Exception: If an error occurs.
+
+            """
+            if messages:
+                return messages.pop(0)
+            return await receive()
+
+        await self.app(scope, receive_wrapper, send)

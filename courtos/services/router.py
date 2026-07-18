@@ -6,19 +6,34 @@ from courtos.services.game_state import GameStateService
 from courtos.services.network import NetworkPolicyService
 
 class EventRouter:
+    """Service class.
+    """
+
     def __init__(
         self,
         kinematic_service: KinematicService,
         game_state_service: GameStateService,
         network_service: NetworkPolicyService
     ):
+        """Method description.
+
+        Args:
+            *args: Arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Any: Return value.
+
+        Raises:
+            Exception: If an error occurs.
+
+        """
         self.kinematic_service = kinematic_service
         self.game_state_service = game_state_service
         self.network_service = network_service
 
     def route(self, event: TelemetryEvent, current_state: CourtOSState) -> Tuple[List[Incident], bool]:
-        """
-        Route telemetry event to appropriate service.
+        """Route telemetry event to appropriate service.
         Returns: Tuple[List[Incident], state_updated_bool]
         """
         state_updated = False
