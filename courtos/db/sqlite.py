@@ -3,7 +3,7 @@ import json
 import aiosqlite
 from typing import List, Optional
 from datetime import datetime, timezone
-from courtos.models import TelemetryEvent, Incident, VideoRecord, VideoStatus
+from courtos.models import TelemetryEvent, Incident
 from courtos.db.adapter import DatabaseAdapter
 
 class SqliteAdapter(DatabaseAdapter):
@@ -285,55 +285,6 @@ class SqliteAdapter(DatabaseAdapter):
                     })
         return entries
 
-
-    async def store_video(self, video: VideoRecord) -> None:
-        query = """
-            INSERT INTO videos (video_id, filename, status, uploaded_at, completed_at)
-            VALUES (?, ?, ?, ?, ?)
-        """
-        async with aiosqlite.connect(self.db_url) as db:
-            await db.execute("PRAGMA foreign_keys = ON;")
-            await db.execute(query, (
-                video.video_id,
-                video.filename,
-                video.status.value,
-                video.uploaded_at.isoformat(),
-                video.completed_at.isoformat() if video.completed_at else None
-            ))
-            await db.commit()
-
-    async def get_videos(self) -> List[VideoRecord]:
-        query = """
-            SELECT video_id, filename, status, uploaded_at, completed_at
-            FROM videos
-            ORDER BY uploaded_at DESC
-        """
-        videos = []
-        async with aiosqlite.connect(self.db_url) as db:
-            async with db.execute(query) as cursor:
-                async for row in cursor:
-                    videos.append(VideoRecord(
-                        video_id=row[0],
-                        filename=row[1],
-                        status=VideoStatus(row[2]),
-                        uploaded_at=datetime.fromisoformat(row[3]),
-                        completed_at=datetime.fromisoformat(row[4]) if row[4] else None
-                    ))
-        return videos
-
-    async def update_video_status(self, video_id: str, status: VideoStatus, completed_at: Optional[datetime] = None) -> None:
-        query = """
-            UPDATE videos
-            SET status = ?, completed_at = ?
-            WHERE video_id = ?
-        """
-        async with aiosqlite.connect(self.db_url) as db:
-            await db.execute(query, (
-                status.value,
-                completed_at.isoformat() if completed_at else None,
-                video_id
-            ))
-            await db.commit()
 
     async def close(self) -> None:
         pass

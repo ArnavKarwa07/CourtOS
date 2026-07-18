@@ -1,5 +1,4 @@
-import VideoUploadPanel from './components/VideoUploadPanel';
-import VideoTracker from './components/VideoTracker';
+
 import React, { useState, useEffect, useRef, useReducer } from "react";
 
 // Design Enums matching backend
@@ -1498,9 +1497,6 @@ export default function App() {
             )}
           </ul>
         </section>
-                {/* Mock Video Feature */}
-        <VideoUploadPanel />
-        <VideoTracker />
 {/* end grid container */}
       </div>
 
