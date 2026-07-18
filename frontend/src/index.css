@@ -83,7 +83,7 @@ input, button, select {
     "game       incidents   assistant"
     "overlay    incidents   assistant"
     "feed       network     commentary"
-    "video      video       video";
+    "upload     tracker     tracker";
   gap: var(--space-4);
   padding: var(--space-4);
   max-width: 1700px;
@@ -100,7 +100,7 @@ input, button, select {
       "overlay    incidents"
       "feed       network"
       "assistant  commentary"
-      "video      video";
+      "upload     tracker";
   }
 }
 
@@ -116,7 +116,8 @@ input, button, select {
       "network"
       "assistant"
       "commentary"
-      "video";
+      "upload"
+      "tracker";
   }
 }
 
