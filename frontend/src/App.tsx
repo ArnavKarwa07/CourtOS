@@ -199,6 +199,17 @@ export default function App() {
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [srAnnouncement, setSrAnnouncement] = useState("");
 
+  // Mode toggle state
+  const [currentMode, setCurrentMode] = useState<"simulation" | "realtime">("simulation");
+  const [showRealtimeModal, setShowRealtimeModal] = useState(false);
+
+  // Heatmap state - tracks activity intensity at grid positions on the court
+  const [heatmapData, setHeatmapData] = useState<number[][]>(() => {
+    const rows = 6;
+    const cols = 10;
+    return Array.from({ length: rows }, () => Array(cols).fill(0));
+  });
+
   // AI state variables
   const [commentaries, setCommentaries] = useState<
     { commentary: string; timestamp: string }[]
@@ -217,6 +228,52 @@ export default function App() {
   const apiBase = window.location.origin; // Same-origin in production, Vite proxies in dev
   const sseReconnectDelay = useRef(1000);
   const reconnectTimer = useRef<number | null>(null);
+
+  // Mode toggle handler
+  const handleModeSwitch = (mode: "simulation" | "realtime") => {
+    if (mode === "realtime") {
+      setShowRealtimeModal(true);
+    } else {
+      setCurrentMode("simulation");
+    }
+  };
+
+  // Heatmap simulation effect - generates activity hotspots based on play state
+  useEffect(() => {
+    if (currentMode !== "simulation") return;
+    const interval = setInterval(() => {
+      setHeatmapData(prev => {
+        const next = prev.map(row => row.map(v => Math.max(0, v * 0.85))); // decay
+        const playState = state.current.play_state;
+        // Generate activity based on play state
+        if (playState === "live") {
+          // Multiple hotspots during live play
+          for (let k = 0; k < 3; k++) {
+            const r = Math.floor(Math.random() * 6);
+            const c = Math.floor(Math.random() * 10);
+            next[r][c] = Math.min(1, next[r][c] + 0.3 + Math.random() * 0.5);
+          }
+          // Paint area activity
+          next[Math.floor(Math.random() * 3) + 1][Math.floor(Math.random() * 2)] += 0.4;
+          next[Math.floor(Math.random() * 3) + 1][8 + Math.floor(Math.random() * 2)] += 0.4;
+        } else if (playState === "dead_ball" || playState === "timeout") {
+          // Concentrated activity near center
+          const r = 2 + Math.floor(Math.random() * 2);
+          const c = 4 + Math.floor(Math.random() * 2);
+          next[r][c] = Math.min(1, next[r][c] + 0.2);
+        } else if (playState === "halftime") {
+          // Very low activity, scattered
+          if (Math.random() > 0.7) {
+            const r = Math.floor(Math.random() * 6);
+            const c = Math.floor(Math.random() * 10);
+            next[r][c] = Math.min(1, next[r][c] + 0.1);
+          }
+        }
+        return next.map(row => row.map(v => Math.min(1, v)));
+      });
+    }, 800);
+    return () => clearInterval(interval);
+  }, [currentMode, state.current.play_state]);
 
   // Toggle visual theme
   const toggleTheme = () => {
@@ -657,6 +714,21 @@ export default function App() {
               gap: "var(--space-4)",
             }}
           >
+            {/* Mode Toggle */}
+            <div className="mode-toggle">
+              <button
+                className={`mode-toggle-btn ${currentMode === "simulation" ? "mode-toggle-btn--active" : ""}`}
+                onClick={() => handleModeSwitch("simulation")}
+              >
+                ⚡ Simulation
+              </button>
+              <button
+                className={`mode-toggle-btn ${currentMode === "realtime" ? "mode-toggle-btn--active" : ""}`}
+                onClick={() => handleModeSwitch("realtime")}
+              >
+                🔴 Real-Time
+              </button>
+            </div>
             <div
               style={{
                 display: "flex",
@@ -882,12 +954,45 @@ export default function App() {
               </form>
             </div>
 
-            {/* Simplified court visualizer */}
+            {/* Court visualizer with live heatmap */}
             <svg
               viewBox="0 0 100 60"
               className="court-svg"
-              aria-label="Basketball court diagram showing active overlays"
+              aria-label="Basketball court diagram with live heatmap"
             >
+              <defs>
+                <radialGradient id="heatGlow">
+                  <stop offset="0%" stopColor="rgba(239,68,68,0.8)" />
+                  <stop offset="50%" stopColor="rgba(245,158,11,0.4)" />
+                  <stop offset="100%" stopColor="rgba(96,165,250,0)" />
+                </radialGradient>
+              </defs>
+
+              {/* Heatmap cells */}
+              {heatmapData.map((row, ri) =>
+                row.map((val, ci) => {
+                  if (val < 0.05) return null;
+                  const x = ci * 10;
+                  const y = ri * 10;
+                  const r = val > 0.7 ? 0 : val > 0.4 ? 120 : 200;
+                  const g = val > 0.7 ? Math.floor(68 + (1 - val) * 100) : val > 0.4 ? Math.floor(158 - val * 60) : Math.floor(165 + val * 50);
+                  const b = val > 0.7 ? 68 : val > 0.4 ? 11 : 250;
+                  return (
+                    <rect
+                      key={`heat-${ri}-${ci}`}
+                      x={x}
+                      y={y}
+                      width="10"
+                      height="10"
+                      fill={`rgba(${r},${g},${b},${val * 0.7})`}
+                      rx="2"
+                      style={{ transition: "fill 0.4s ease" }}
+                    />
+                  );
+                })
+              )}
+
+              {/* Court lines */}
               <rect
                 x="0"
                 y="0"
@@ -954,6 +1059,20 @@ export default function App() {
                 />
               ))}
             </svg>
+
+            {/* Heatmap legend */}
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", fontSize: "var(--text-xs)", color: "var(--color-text-secondary)", marginTop: "var(--space-2)" }}>
+              <span>Activity:</span>
+              <div style={{ display: "flex", height: "8px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
+                <div style={{ flex: 1, background: "rgba(96,165,250,0.3)" }} />
+                <div style={{ flex: 1, background: "rgba(245,158,11,0.5)" }} />
+                <div style={{ flex: 1, background: "rgba(239,68,68,0.7)" }} />
+              </div>
+              <span style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-4)" }}>
+                <span>Low</span>
+                <span>High</span>
+              </span>
+            </div>
           </div>
         </section>
 
@@ -1384,6 +1503,48 @@ export default function App() {
         <VideoTracker />
 {/* end grid container */}
       </div>
+
+      {/* Real-Time Mode Alert Modal */}
+      {showRealtimeModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowRealtimeModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="realtime-modal-title"
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">🔒</div>
+            <h3 id="realtime-modal-title" className="modal-title">
+              Real-Time Mode Unavailable
+            </h3>
+            <div className="modal-body">
+              <p>Real-time mode is currently not available for the following reasons:</p>
+              <ul className="modal-reasons">
+                <li>
+                  <strong>No live hardware connected</strong> — Real-time mode requires active venue sensor feeds (accelerometers, tracking cameras, RFID tags) which are not currently online.
+                </li>
+                <li>
+                  <strong>No active game session</strong> — There is no scheduled game or event session bound to this CourtOS instance.
+                </li>
+                <li>
+                  <strong>Network policy not configured</strong> — Production network policies (broadcast, telemetry, emergency channels) have not been provisioned by the venue operator.
+                </li>
+              </ul>
+              <p style={{ marginTop: "var(--space-3)", color: "var(--color-text-secondary)", fontSize: "var(--text-sm)" }}>
+                Please use <strong>Simulation Mode</strong> to explore all CourtOS features with synthetic game data.
+              </p>
+            </div>
+            <button
+              className="btn modal-close-btn"
+              onClick={() => setShowRealtimeModal(false)}
+              autoFocus
+            >
+              Got it — Stay in Simulation
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Floating Toast Notification Stack */}
       <div

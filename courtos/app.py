@@ -79,7 +79,7 @@ if settings.mode == "simulation":
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins or ["*"] if settings.mode == "simulation" else [],
+    allow_origins=["*"] if settings.mode == "simulation" else cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "X-Requested-With", "X-Request-ID"]
@@ -104,7 +104,10 @@ async def startup_event():
     # 4. Start simulation runner if mode is simulation
     global sim_runner
     if settings.mode == "simulation":
-        sim_runner = SimulationRunner(settings.port, settings.sim_interval)
+        # Use PORT env var (Cloud Run sets this to 8080) rather than settings.port
+        import os as _os
+        actual_port = int(_os.environ.get("PORT", settings.port))
+        sim_runner = SimulationRunner(actual_port, settings.sim_interval)
         # Give server a half second to bind port before launching http client loop
         await asyncio.sleep(0.5)
         await sim_runner.start()
