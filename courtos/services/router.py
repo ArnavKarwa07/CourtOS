@@ -15,19 +15,6 @@ class EventRouter:
         game_state_service: GameStateService,
         network_service: NetworkPolicyService
     ):
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         self.kinematic_service = kinematic_service
         self.game_state_service = game_state_service
         self.network_service = network_service

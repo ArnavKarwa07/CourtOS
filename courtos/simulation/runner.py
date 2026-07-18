@@ -9,59 +9,19 @@ from courtos.ai.gemini import GEMINI_MIN_REQUEST_INTERVAL_SECONDS
 logger = logging.getLogger("courtos.simulation")
 
 class SimulationRunner:
-    """Class description.\n"""
 
     def __init__(self, port: int, interval_sec: float):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self.port = port
         self.interval_sec = max(interval_sec, GEMINI_MIN_REQUEST_INTERVAL_SECONDS)
         self._running = False
         self._task: Optional[asyncio.Task] = None
 
     async def start(self) -> None:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self._running = True
         self._task = asyncio.create_task(self._loop())
         logger.info("Simulation runner started", extra={"details": {"port": self.port, "interval_sec": self.interval_sec}})
 
     async def stop(self) -> None:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self._running = False
         if self._task:
             self._task.cancel()
@@ -72,19 +32,6 @@ class SimulationRunner:
         logger.info("Simulation runner stopped")
 
     async def _loop(self) -> None:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         url = f"http://127.0.0.1:{self.port}/api/v1/telemetry"
         client = httpx.AsyncClient(headers={"X-Requested-With": "CourtOS-Client"})
 

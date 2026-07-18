@@ -2,19 +2,6 @@ import re
 import html
 
 def sanitize_text(value: str) -> str:
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     if not isinstance(value, str):
         return value
     

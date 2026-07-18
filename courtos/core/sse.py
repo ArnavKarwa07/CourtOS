@@ -7,19 +7,6 @@ class SSEPublisher:
     """
 
     def __init__(self):
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         self._queues: List[asyncio.Queue] = []
         self._heartbeat_task: Optional[asyncio.Task] = None
 

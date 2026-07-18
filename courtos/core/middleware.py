@@ -6,22 +6,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
-    """Class description.\n"""
 
     async def dispatch(self, request: Request, call_next):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         # Inject correlation ID
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = request_id
@@ -31,22 +17,8 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         return response
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Class description.\n"""
 
     async def dispatch(self, request: Request, call_next):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         response = await call_next(request)
 
         # Apply secure response headers
@@ -82,38 +54,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """
 
     def __init__(self, app, max_requests: int = 200, window_seconds: int = 60):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.client_records: Dict[str, list] = {}
 
     async def dispatch(self, request: Request, call_next):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         # Apply rate limiting specifically to POST telemetry endpoint
         if request.method == "POST" and request.url.path == "/api/v1/telemetry":
             client_ip = request.client.host if request.client else "unknown"
@@ -140,22 +86,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 class CSRFShieldMiddleware(BaseHTTPMiddleware):
-    """Class description.\n"""
 
     async def dispatch(self, request: Request, call_next):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         # Enforce X-Requested-With header on all state-mutating requests (POST, PUT, DELETE, PATCH)
         # to defend against CSRF attacks in unauthenticated MVP dashboard
         if request.method in ("POST", "PUT", "DELETE", "PATCH"):
@@ -173,22 +105,8 @@ class CSRFShieldMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 class PayloadSizeLimitMiddleware:
-    """Class description.\n"""
 
     def __init__(self, app, max_upload_size: int = 1_048_576):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self.app = app
         self.max_upload_size = max_upload_size
 
@@ -234,19 +152,6 @@ class PayloadSizeLimitMiddleware:
 
         # Re-inject consumed body
         async def receive_wrapper():
-            """Method description.
-
-            Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-            Returns:
-            Any: Return value.
-
-            Raises:
-            Exception: If an error occurs.
-
-            """
             if messages:
                 return messages.pop(0)
             return await receive()

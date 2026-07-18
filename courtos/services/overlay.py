@@ -7,19 +7,6 @@ class OverlayService:
     """
 
     def evaluate_gating(self, play_state: PlayState, current_overlay: OverlayState) -> OverlayState:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         if play_state == PlayState.LIVE:
             return OverlayState(
                 mode="static",

@@ -4,13 +4,11 @@ from courtos.models.sanitizers import sanitize_text
 from courtos.models.enums import EventType, PlayState
 
 class BaseTelemetryModel(BaseModel):
-    """Class description.\n"""
 
     # Enforce strict field checks at the class level
     model_config = ConfigDict(extra="forbid")
 
 class KinematicPayload(BaseTelemetryModel):
-    """Class description.\n"""
 
     player_id: str = Field(min_length=1)
     deceleration_g: float = Field(ge=0)
@@ -21,37 +19,21 @@ class KinematicPayload(BaseTelemetryModel):
     @field_validator('player_id', mode='before')
     @classmethod
     def sanitize(cls, v: str) -> str:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         return sanitize_text(v)
 
 class GameStatePayload(BaseTelemetryModel):
-    """Class description.\n"""
 
     play_state: PlayState
     game_clock: str = Field(pattern=r"^\d{2}:\d{2}$")
     period: int = Field(ge=1, le=4)
 
 class NetworkPayload(BaseTelemetryModel):
-    """Class description.\n"""
 
     channel: str = Field(min_length=1)
     bandwidth_mbps: float = Field(ge=0)
     latency_ms: float = Field(ge=0)
 
 class ReviewPayload(BaseTelemetryModel):
-    """Class description.\n"""
 
     review_type: str = Field(min_length=1)
     description: str = Field(min_length=1)
@@ -60,19 +42,6 @@ class ReviewPayload(BaseTelemetryModel):
     @field_validator('review_type', 'description', 'requested_by', mode='before')
     @classmethod
     def sanitize(cls, v: str) -> str:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         return sanitize_text(v)
 
 PAYLOAD_MAP = {
@@ -83,7 +52,6 @@ PAYLOAD_MAP = {
 }
 
 class TelemetryEvent(BaseModel):
-    """Class description.\n"""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -96,37 +64,11 @@ class TelemetryEvent(BaseModel):
     @field_validator('event_id', 'source', mode='before')
     @classmethod
     def sanitize(cls, v: str) -> str:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         return sanitize_text(v)
 
     @model_validator(mode="before")
     @classmethod
     def validate_payload_type(cls, data: dict) -> dict:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         if not isinstance(data, dict):
             return data
         

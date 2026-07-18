@@ -10,22 +10,8 @@ from courtos.ai.state import AgentState
 settings = Settings()
 
 class IncidentSummarizer:
-    """Class description.\n"""
 
     def __init__(self):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self.api_key = settings.gemini_api_key or "MOCK_KEY"
         self.model = ChatGoogleGenerativeAI(
             model=GEMINI_MODEL_NAME,
@@ -35,19 +21,6 @@ class IncidentSummarizer:
         self.workflow = self._build_graph()
 
     def _build_graph(self) -> StateGraph:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         builder = StateGraph(AgentState)
         
         # Add Nodes
@@ -62,36 +35,10 @@ class IncidentSummarizer:
         return builder.compile()
 
     async def gather_incident_data(self, state: AgentState) -> Dict[str, Any]:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         # Context already contains raw incident object passed in initial_state
         return {"context": state.get("context", {})}
 
     async def generate_summary(self, state: AgentState) -> Dict[str, Any]:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         incident = state["context"].get("incident", {})
         
         if not settings.gemini_api_key:
@@ -122,19 +69,6 @@ class IncidentSummarizer:
         return {"reply": reply}
 
     async def summarize(self, incident: Dict[str, Any]) -> str:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         initial_state = {
             "messages": [],
             "queries": [],

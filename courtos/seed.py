@@ -9,19 +9,6 @@ from courtos.models import TelemetryEvent
 from courtos.models.enums import EventType
 
 async def seed_data(count: int):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     settings = Settings()
     
     if settings.db_backend == "sqlite":

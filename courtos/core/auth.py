@@ -10,40 +10,13 @@ api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 bearer_scheme = HTTPBearer(auto_error=False)
 
 class AuthenticatedUser:
-    """Class description.\n"""
 
     def __init__(self, identity: str, role: str, auth_type: str):
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         self.identity = identity
         self.role = role
         self.auth_type = auth_type
 
 def get_settings():
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     from courtos.app import settings
     return settings
 
@@ -52,19 +25,6 @@ async def get_current_user_or_key(
     api_key: Optional[str] = Depends(api_key_header),
     bearer: Optional[str] = Depends(bearer_scheme)
 ) -> Optional[AuthenticatedUser]:
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     settings = get_settings()
 
     if not getattr(settings, 'auth_required', False):

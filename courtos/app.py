@@ -60,19 +60,6 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     # 1. Initialize DB adapter
     await db_adapter.initialize()
     
@@ -151,19 +138,6 @@ app.add_middleware(RequestIdMiddleware)
 # Exception handling for validation errors matching TRD JSON shape
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     details = []
     for error in exc.errors():
         loc = [str(x) for x in error.get("loc", [])]
@@ -190,19 +164,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # REST Endpoint Handlers
 @app.get("/api/v1/health")
 async def get_health():
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     # Verify DB health
     try:
         if settings.db_backend == "sqlite":
@@ -239,36 +200,10 @@ async def get_health():
 
 @app.get("/api/v1/state")
 async def get_state():
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     return state_manager.get_state()
 
 @app.post("/api/v1/telemetry", status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_user_or_key)])
 async def ingest_telemetry(event: TelemetryEvent, request: Request):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     try:
         count, new_incidents = await state_manager.process_event(event)
         
@@ -319,19 +254,6 @@ async def list_incidents(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     filt = None if status_filter == "all" else status_filter
     incidents = await db_adapter.get_incidents(status=filt)
     
@@ -349,19 +271,6 @@ async def list_incidents(
 
 @app.post("/api/v1/incidents/{incident_id}/resolve", dependencies=[Depends(get_current_user_or_key)])
 async def resolve_incident(incident_id: str, request: Request):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     try:
         req_id = getattr(request.state, "request_id", None)
         resolved = await state_manager.resolve_incident(incident_id, request_id=req_id)
@@ -404,19 +313,6 @@ async def resolve_incident(incident_id: str, request: Request):
 
 @app.post("/api/v1/court/overlay", dependencies=[Depends(get_current_user_or_key)])
 async def update_court_overlay(request: Request):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     body = await request.json()
     action = body.get("action")
     overlay_id = body.get("overlay_id", "")
@@ -455,25 +351,11 @@ async def update_court_overlay(request: Request):
         raise e
 
 class AIAssistantRequest(BaseModel):
-    """Class description.\n"""
 
     query: str
 
 @app.post("/api/v1/ai/assistant")
 async def ai_assistant(req: AIAssistantRequest):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     try:
         reply = await assistant.ask(req.query)
         return {"reply": reply}
@@ -487,19 +369,6 @@ async def ai_assistant(req: AIAssistantRequest):
 
 @app.get("/api/v1/network/allocation")
 async def get_network_allocation():
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     state = state_manager.get_state()
     has_critical = any(
         i.severity == "critical" and i.status == "active"
@@ -516,19 +385,6 @@ async def get_network_allocation():
 
 @app.post("/api/v1/network/recalculate", dependencies=[Depends(get_current_user_or_key)])
 async def post_network_recalculate(request: Request):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     req_id = getattr(request.state, "request_id", None)
     allocation = await state_manager.force_network_recalculate(request_id=req_id)
     
@@ -551,19 +407,6 @@ async def get_audit_log(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     entries = await db_adapter.get_audit_entries(limit=limit, offset=offset)
     
     total_count = 0
@@ -589,33 +432,7 @@ async def get_audit_log(
 
 @app.get("/api/v1/events/stream")
 async def get_events_stream(request: Request):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     async def sse_event_generator():
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         # First send the initial state snapshot on connect
         state_json = state_manager.get_state().model_dump_json()
         yield {
@@ -643,19 +460,6 @@ if os.path.exists(frontend_assets):
     app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
 
 async def serve_spa(catchall: str):
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     # Prevent intercepting API routes that are 404
     if catchall.startswith("api/v1") or catchall.startswith("api"):
         return JSONResponse(

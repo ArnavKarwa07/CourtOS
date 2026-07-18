@@ -15,19 +15,6 @@ _request_timestamps = deque()
 
 
 async def wait_for_gemini_slot() -> None:
-    """Method description.
-
-    Args:
-    *args: Arguments.
-    **kwargs: Keyword arguments.
-
-    Returns:
-    Any: Return value.
-
-    Raises:
-    Exception: If an error occurs.
-
-    """
     while True:
         async with _request_lock:
             now = monotonic()

@@ -4,7 +4,6 @@ from courtos.models.enums import PlayState
 from courtos.models.incident import Incident
 
 class NetworkAllocation(BaseModel):
-    """Class description.\n"""
 
     broadcast: float = Field(ge=0, le=100)
     telemetry: float = Field(ge=0, le=100)
@@ -13,13 +12,11 @@ class NetworkAllocation(BaseModel):
     simulated: bool = True
 
 class OverlayState(BaseModel):
-    """Class description.\n"""
 
     mode: str = "dynamic"  # "static" or "dynamic"
     active_overlays: list[str] = Field(default_factory=list)
 
 class CourtOSState(BaseModel):
-    """Class description.\n"""
 
     game_clock: str = "00:00"
     period: int = 1

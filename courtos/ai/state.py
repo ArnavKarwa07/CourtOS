@@ -3,7 +3,6 @@ from langchain_core.messages import BaseMessage
 import operator
 
 class AgentState(TypedDict):
-    """Class description.\n"""
 
     messages: Annotated[List[BaseMessage], operator.add]
     queries: List[str]

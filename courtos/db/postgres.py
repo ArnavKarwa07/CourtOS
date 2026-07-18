@@ -10,36 +10,10 @@ class PostgresAdapter(DatabaseAdapter):
     """
 
     def __init__(self, db_url: str):
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         self.db_url = db_url
         self._pool: Optional[asyncpg.Pool] = None
 
     async def initialize(self) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         # Create connection pool
         self._pool = await asyncpg.create_pool(
             dsn=self.db_url,
@@ -48,19 +22,6 @@ class PostgresAdapter(DatabaseAdapter):
         )
 
     async def store_event(self, event: TelemetryEvent) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             INSERT INTO telemetry_events (event_id, event_type, timestamp, source, payload, received_at)
             VALUES ($1, $2, $3, $4, $5, $6)
@@ -78,19 +39,6 @@ class PostgresAdapter(DatabaseAdapter):
             )
 
     async def store_incident(self, incident: Incident) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             INSERT INTO incidents (incident_id, severity, category, message, created_at, source_event_id, status, resolved_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -109,19 +57,6 @@ class PostgresAdapter(DatabaseAdapter):
             )
 
     async def resolve_incident(self, incident_id: str, resolved_at: datetime) -> Optional[Incident]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         update_query = """
             UPDATE incidents
             SET status = $1, resolved_at = $2
@@ -157,19 +92,6 @@ class PostgresAdapter(DatabaseAdapter):
         self, action: str, details: dict, actor: str = "system",
         source_event_id: Optional[str] = None, request_id: Optional[str] = None
     ) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             INSERT INTO audit_log (log_id, action, actor, details, source_event_id, request_id, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -190,19 +112,6 @@ class PostgresAdapter(DatabaseAdapter):
             )
 
     async def store_snapshot(self, snapshot_id: str, state_json: str, trigger_event_id: Optional[str]) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             INSERT INTO state_snapshots (snapshot_id, state, trigger_event_id, created_at)
             VALUES ($1, $2, $3, $4)
@@ -217,19 +126,6 @@ class PostgresAdapter(DatabaseAdapter):
             )
 
     async def get_latest_snapshot(self) -> Optional[dict]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             SELECT state, trigger_event_id
             FROM state_snapshots
@@ -251,19 +147,6 @@ class PostgresAdapter(DatabaseAdapter):
         return None
 
     async def get_events(self, limit: int = 100, offset: int = 0) -> List[TelemetryEvent]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             SELECT event_id, event_type, timestamp, source, payload
             FROM telemetry_events
@@ -287,19 +170,6 @@ class PostgresAdapter(DatabaseAdapter):
         return events
 
     async def get_events_after(self, event_id: str) -> List[TelemetryEvent]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         time_query = "SELECT received_at FROM telemetry_events WHERE event_id = $1"
         query = """
             SELECT event_id, event_type, timestamp, source, payload
@@ -329,19 +199,6 @@ class PostgresAdapter(DatabaseAdapter):
         return events
 
     async def get_incidents(self, status: Optional[str] = None) -> List[Incident]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         if status:
             query = """
                 SELECT incident_id, severity, category, message, created_at, source_event_id, status, resolved_at
@@ -375,19 +232,6 @@ class PostgresAdapter(DatabaseAdapter):
         return incidents
 
     async def get_incident(self, incident_id: str) -> Optional[Incident]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             SELECT incident_id, severity, category, message, created_at, source_event_id, status, resolved_at
             FROM incidents
@@ -409,19 +253,6 @@ class PostgresAdapter(DatabaseAdapter):
         return None
 
     async def get_audit_entries(self, limit: int = 50, offset: int = 0) -> List[dict]:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         query = """
             SELECT log_id, action, actor, details, source_event_id, request_id, created_at
             FROM audit_log
@@ -447,18 +278,5 @@ class PostgresAdapter(DatabaseAdapter):
         return entries
 
     async def close(self) -> None:
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         if self._pool:
             await self._pool.close()

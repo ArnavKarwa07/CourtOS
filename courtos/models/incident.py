@@ -4,7 +4,6 @@ from courtos.models.enums import Severity, IncidentStatus
 from courtos.models.sanitizers import sanitize_text
 
 class Incident(BaseModel):
-    """Class description.\n"""
 
     incident_id: str = Field(min_length=1)
     severity: Severity
@@ -18,17 +17,4 @@ class Incident(BaseModel):
     @field_validator('category', 'message', mode='before')
     @classmethod
     def sanitize(cls, v: str) -> str:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         return sanitize_text(v)

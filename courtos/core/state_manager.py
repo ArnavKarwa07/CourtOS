@@ -14,19 +14,6 @@ class StateManager:
     """
 
     def __init__(self, db: DatabaseAdapter, sse: SSEPublisher, router: EventRouter, network_service: NetworkPolicyService):
-        """Method description.
-
-        Args:
-            *args: Arguments.
-            **kwargs: Keyword arguments.
-
-        Returns:
-            Any: Return value.
-
-        Raises:
-            Exception: If an error occurs.
-
-        """
         self.db = db
         self.sse = sse
         self.router = router
@@ -254,19 +241,6 @@ class StateManager:
             return self._state.overlay
 
     def _default_state(self) -> CourtOSState:
-        """Method description.
-
-        Args:
-        *args: Arguments.
-        **kwargs: Keyword arguments.
-
-        Returns:
-        Any: Return value.
-
-        Raises:
-        Exception: If an error occurs.
-
-        """
         return CourtOSState(
             game_clock="00:00",
             period=1,
