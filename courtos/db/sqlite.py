@@ -18,9 +18,12 @@ class SqliteAdapter(DatabaseAdapter):
             os.makedirs(db_dir, exist_ok=True)
 
         async with aiosqlite.connect(self.db_url) as db:
-            # Enable foreign keys and WAL mode
+            # Enable foreign keys, WAL mode, normal synchronous mode, and memory temp store for high efficiency
             await db.execute("PRAGMA foreign_keys = ON;")
             await db.execute("PRAGMA journal_mode = WAL;")
+            await db.execute("PRAGMA synchronous = NORMAL;")
+            await db.execute("PRAGMA temp_store = MEMORY;")
+            await db.execute("PRAGMA cache_size = -64000;")
             
             # Read and execute migrations
             migration_path = os.path.join(os.path.dirname(__file__), "migrations", "001_init.sql")

@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -7,7 +8,7 @@ class Settings(BaseSettings):
     db_backend: str = "sqlite"
     db_url: str = "./data/courtos.db"
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = int(os.environ.get("PORT", os.environ.get("COURTOS_PORT", 8080)))
     log_level: str = "info"
     sim_interval: float = 1.0
 
@@ -18,3 +19,4 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.1-flash-lite"
     gemini_requests_per_minute: int = 15
+

@@ -66,3 +66,12 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Heavy Media Assets (Keep Repo Size < 10 MB)
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+videos/
+frontend/public/videos/

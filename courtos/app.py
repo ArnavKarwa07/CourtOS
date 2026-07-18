@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from courtos.models.state import OverlayState, NetworkAllocation
 from courtos.models.enums import PlayState
 from courtos.services import KinematicService, GameStateService, OverlayService, NetworkPolicyService, EventRouter
-from courtos.core import StateManager, SSEPublisher, RequestIdMiddleware, SecurityHeadersMiddleware, CSRFShieldMiddleware, configure_logging
+from courtos.core import StateManager, SSEPublisher, RequestIdMiddleware, SecurityHeadersMiddleware, CSRFShieldMiddleware, RateLimitMiddleware, configure_logging
 from courtos.simulation import SimulationRunner
 
 # Instantiate configuration
@@ -86,6 +86,7 @@ app.add_middleware(
 )
 
 # Apply custom middlewares
+app.add_middleware(RateLimitMiddleware, max_requests=300, window_seconds=60)
 app.add_middleware(CSRFShieldMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestIdMiddleware)
@@ -452,8 +453,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "dist"))
-if os.path.exists(frontend_dist):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+frontend_assets = os.path.join(frontend_dist, "assets")
+if os.path.exists(frontend_assets):
+    app.mount("/assets", StaticFiles(directory=frontend_assets), name="assets")
 
 async def serve_spa(catchall: str):
     # Prevent intercepting API routes that are 404
