@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from typing import Optional
-from fastapi import FastAPI, Request, status, Query, Depends
+from fastapi import FastAPI, Request, status, Query, Depends, UploadFile, File, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +10,9 @@ from sse_starlette.sse import EventSourceResponse
 from courtos.config import Settings
 from courtos.db.sqlite import SqliteAdapter
 from courtos.db.postgres import PostgresAdapter
-from courtos.models import TelemetryEvent
+from courtos.models import TelemetryEvent, VideoRecord, VideoStatus
+import uuid
+from datetime import datetime, timezone
 from courtos.models.state import OverlayState, NetworkAllocation
 from courtos.models.enums import PlayState
 from courtos.services import KinematicService, GameStateService, OverlayService, NetworkPolicyService, EventRouter
@@ -438,6 +440,38 @@ async def get_events_stream(request: Request):
             yield sse_event
             
     return EventSourceResponse(sse_event_generator())
+
+@app.get("/api/v1/videos")
+async def get_videos():
+    videos = await db_adapter.get_videos()
+    return {"videos": videos}
+
+async def mock_video_processing(video_id: str):
+    await asyncio.sleep(5)
+    try:
+        from courtos.ai.video_analyzer import VideoAnalyzer
+        analyzer = VideoAnalyzer()
+        events_dicts = await analyzer.analyze(video_id)
+        for e_dict in events_dicts:
+            event = TelemetryEvent(**e_dict)
+            await state_manager.process_event(event)
+    except Exception as e:
+        logger.error(f"VideoAnalyzer failed for {video_id}: {e}", exc_info=True)
+
+    await db_adapter.update_video_status(video_id, VideoStatus.COMPLETED, datetime.now(timezone.utc))
+
+@app.post("/api/v1/videos/upload")
+async def upload_video(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    video_id = str(uuid.uuid4())
+    record = VideoRecord(
+        video_id=video_id,
+        filename=file.filename,
+        status=VideoStatus.PROCESSING,
+        uploaded_at=datetime.now(timezone.utc)
+    )
+    await db_adapter.store_video(record)
+    background_tasks.add_task(mock_video_processing, video_id)
+    return {"video_id": video_id, "status": "processing"}
 
 # Serve frontend static assets same-origin in production
 import os

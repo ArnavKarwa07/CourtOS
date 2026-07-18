@@ -78,3 +78,18 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log (action, created_at DESC);
+
+-- Create videos table
+CREATE TABLE IF NOT EXISTS videos (
+    video_id       TEXT        PRIMARY KEY,
+    filename       TEXT        NOT NULL,
+    status         TEXT        NOT NULL DEFAULT 'processing',
+    uploaded_at    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at   TIMESTAMP,
+    CONSTRAINT chk_video_status CHECK (
+        status IN ('processing', 'completed', 'failed')
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_videos_status ON videos (status);
+CREATE INDEX IF NOT EXISTS idx_videos_uploaded ON videos (uploaded_at DESC);
