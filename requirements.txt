@@ -9,3 +9,4 @@ sse-starlette>=1.6.0
 structlog>=23.1.0
 langgraph>=0.1.0
 langchain-google-genai>=1.0.0
+python-multipart>=0.0.6
